@@ -1,123 +1,133 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <title>MagnetMap - Carte Personnalisée</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <!-- Leaflet CSS -->
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
-    integrity="sha256-sA+4PcCPriWhvP0TkHjzD8wv1KD8ULdbz57wC7M1hZU="
-    crossorigin=""
-  />
-  <!-- Leaflet Control Geocoder CSS -->
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css"
-  />
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 10px auto;
-      max-width: 850px;
-      background: #f0f0f0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    #map {
-      /* Format A3 portrait (environ 1123 x 794 px) */
-      width: 794px;
-      height: 1123px;
-      border: 2px solid #333;
-      background: white;
-      margin-bottom: 15px;
-    }
-    #city-name {
-      font-size: 1.4em;
-      font-weight: bold;
-      color: #333;
-      min-height: 24px;
-      margin-bottom: 30px;
-      text-align: center;
-      width: 100%;
-    }
-    #controls {
-      width: 794px;
-      background: #fff;
-      padding: 12px;
-      border: 2px solid #333;
-      margin-bottom: 40px;
-      box-sizing: border-box;
-    }
-    .layer-control {
-      margin-bottom: 15px;
-    }
-    label {
-      margin-right: 15px;
-      user-select: none;
-    }
-    input[type="color"],
-    input[type="range"] {
-      vertical-align: middle;
-      cursor: pointer;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MagnetMap - Carte interactive</title>
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
+/>
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css"
+/>
+<style>
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: white;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  header {
+    background-color: #014421; /* vert foncé */
+    color: white;
+    padding: 15px 20px;
+    font-size: 1.8em;
+    font-weight: bold;
+    flex-shrink: 0;
+  }
+
+  #container {
+    flex: 1;
+    display: flex;
+    height: calc(100vh - 60px);
+  }
+
+  #map {
+    flex: 1;
+  }
+
+  #controls {
+    width: 300px;
+    background: #f7f7f7;
+    padding: 20px;
+    box-shadow: -3px 0 8px rgba(0,0,0,0.1);
+    overflow-y: auto;
+  }
+
+  #controls h2 {
+    margin-top: 0;
+    font-size: 1.3em;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 5px;
+  }
+
+  .layer-control {
+    margin-bottom: 25px;
+  }
+
+  .layer-control label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+
+  .layer-control input[type="color"],
+  .layer-control input[type="range"] {
+    width: 100%;
+    height: 30px;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+
+  .layer-control input[type="checkbox"] {
+    margin-right: 6px;
+  }
+
+  #city-name {
+    text-align: center;
+    margin-top: 8px;
+    font-size: 1.1em;
+    font-weight: 600;
+    color: #014421;
+  }
+</style>
 </head>
 <body>
-  <h1>MagnetMap - Carte Personnalisée</h1>
-  <div id="map"></div>
-  <div id="city-name"></div>
+  <header>MagnetMap</header>
+  <div id="container">
+    <div id="map"></div>
+    <aside id="controls">
+      <h2>Contrôles des couches</h2>
 
-  <div id="controls">
-    <h3>Personnalisation des couches</h3>
-
-    <div class="layer-control">
-      <input type="checkbox" id="routes-visible" checked />
-      <label for="routes-visible"><strong>Routes</strong></label>
-      <label>Couleur:
-        <input type="color" id="routes-color" value="#ff0000" />
-      </label>
-      <label>Transparence:
+      <div class="layer-control" id="control-routes">
+        <label><input type="checkbox" id="routes-visible" checked /> Afficher Routes</label>
+        <label for="routes-color">Couleur</label>
+        <input type="color" id="routes-color" value="#ff6600" />
+        <label for="routes-opacity">Transparence</label>
         <input type="range" id="routes-opacity" min="0" max="1" step="0.05" value="0.7" />
-      </label>
-    </div>
+      </div>
 
-    <div class="layer-control">
-      <input type="checkbox" id="hydro-visible" checked />
-      <label for="hydro-visible"><strong>Hydrologie</strong></label>
-      <label>Couleur:
-        <input type="color" id="hydro-color" value="#0000ff" />
-      </label>
-      <label>Transparence:
-        <input type="range" id="hydro-opacity" min="0" max="1" step="0.05" value="0.5" />
-      </label>
-    </div>
+      <div class="layer-control" id="control-hydro">
+        <label><input type="checkbox" id="hydro-visible" checked /> Afficher Hydrologie</label>
+        <label for="hydro-color">Couleur</label>
+        <input type="color" id="hydro-color" value="#0066cc" />
+        <label for="hydro-opacity">Transparence</label>
+        <input type="range" id="hydro-opacity" min="0" max="1" step="0.05" value="0.6" />
+      </div>
 
-    <div class="layer-control">
-      <input type="checkbox" id="nature-visible" checked />
-      <label for="nature-visible"><strong>Nature</strong></label>
-      <label>Couleur:
-        <input type="color" id="nature-color" value="#008000" />
-      </label>
-      <label>Transparence:
-        <input type="range" id="nature-opacity" min="0" max="1" step="0.05" value="0.4" />
-      </label>
-    </div>
+      <div class="layer-control" id="control-nature">
+        <label><input type="checkbox" id="nature-visible" checked /> Afficher Végétation</label>
+        <label for="nature-color">Couleur</label>
+        <input type="color" id="nature-color" value="#339933" />
+        <label for="nature-opacity">Transparence</label>
+        <input type="range" id="nature-opacity" min="0" max="1" step="0.05" value="0.5" />
+      </div>
+
+      <div id="city-name"></div>
+    </aside>
   </div>
 
-  <!-- Leaflet JS -->
   <script
     src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"
-    integrity="sha256-o9N1jrvO2pzh+5v4fnvU5zE4xR8B8A2+gljm6Lt5P7k="
     crossorigin=""
   ></script>
-
-  <!-- Leaflet Control Geocoder -->
   <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
-
-  <!-- Notre script -->
   <script src="script.js"></script>
 </body>
 </html>

@@ -1,14 +1,14 @@
-// Initialise la carte Leaflet centrée sur la France
+// Initialisation carte Leaflet centrée sur France
 const map = L.map('map', {
   zoomControl: true,
   minZoom: 5,
   maxZoom: 18,
 }).setView([46.5, 2.5], 6);
 
-// Aucun fond de carte (fond blanc)
+// Pas de fond de carte, fond blanc (vide)
 const emptyLayer = L.tileLayer('', { attribution: '' }).addTo(map);
 
-// Elements DOM des contrôles
+// DOM des contrôles
 const controls = {
   routes: {
     visible: document.getElementById('routes-visible'),
@@ -29,7 +29,13 @@ const controls = {
 
 const cityNameDiv = document.getElementById('city-name');
 
-// Fonction style des couches (sans contours)
+let layers = {
+  routes: null,
+  hydro: null,
+  nature: null,
+};
+
+// Fonction style (sans contour)
 function styleFunction(layerName) {
   return function (feature) {
     const color = controls[layerName].color.value;
@@ -44,33 +50,24 @@ function styleFunction(layerName) {
   };
 }
 
-// Variables Leaflet GeoJSON Layer
-let layers = {
-  routes: null,
-  hydro: null,
-  nature: null,
-};
-
-// Chargement des couches GeoJSON avec styles dynamiques
+// Charge un fichier GeoJSON, crée la couche, l’ajoute si visible
 async function loadLayer(name, url) {
-  const response = await fetch(url);
-  if (!response.ok) {
-    alert(`Erreur de chargement du fichier ${url} : ${response.statusText}`);
-    return null;
-  }
-  const data = await response.json();
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(response.statusText);
+    const data = await response.json();
 
-  // Supprime la couche précédente si existe
-  if (layers[name]) {
-    map.removeLayer(layers[name]);
-  }
+    if (layers[name]) map.removeLayer(layers[name]);
 
-  layers[name] = L.geoJSON(data, {
-    style: styleFunction(name),
-  });
+    layers[name] = L.geoJSON(data, {
+      style: styleFunction(name),
+    });
 
-  if (controls[name].visible.checked) {
-    layers[name].addTo(map);
+    if (controls[name].visible.checked) {
+      layers[name].addTo(map);
+    }
+  } catch (err) {
+    alert(`Erreur de chargement de ${url}: ${err.message}`);
   }
 }
 
@@ -81,13 +78,13 @@ function reloadAllLayers() {
   loadLayer('nature', 'data/Nature_LanguedocV2.geojson');
 }
 
-// Mise à jour du style d’une couche existante sans la recharger
+// Met à jour le style d'une couche déjà chargée
 function updateStyle(name) {
   if (!layers[name]) return;
   layers[name].setStyle(styleFunction(name));
 }
 
-// Gestion visibilité couches
+// Affiche ou masque la couche selon checkbox
 function toggleLayer(name) {
   if (controls[name].visible.checked) {
     if (layers[name]) layers[name].addTo(map);
@@ -96,7 +93,7 @@ function toggleLayer(name) {
   }
 }
 
-// Événements sur inputs
+// Ajout écouteurs sur contrôles
 Object.keys(controls).forEach((name) => {
   controls[name].color.addEventListener('input', () => updateStyle(name));
   controls[name].opacity.addEventListener('input', () => updateStyle(name));
@@ -106,7 +103,7 @@ Object.keys(controls).forEach((name) => {
 // Initialisation des couches
 reloadAllLayers();
 
-// Ajout du contrôle de recherche (Leaflet Control Geocoder)
+// Ajout contrôle de recherche Leaflet Control Geocoder
 const geocoder = L.Control.geocoder({
   defaultMarkGeocode: false,
   placeholder: 'Chercher une ville...',
