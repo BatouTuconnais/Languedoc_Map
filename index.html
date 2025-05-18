@@ -3,36 +3,46 @@
 <head>
   <meta charset="UTF-8" />
   <title>MagnetMap - Carte interactive</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Leaflet CSS -->
   <link
     rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    crossorigin=""
+    href="https://unpkg.com/leaflet/dist/leaflet.css"
   />
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 10px;
+    }
+    #map {
+      width: 100%;
+      height: 600px;
+      margin-top: 10px;
+      border: 2px solid #444;
+    }
+    .layer-control {
+      margin-bottom: 5px;
+    }
+  </style>
 </head>
 <body>
-  <h1>MagnetMap - Carte interactive</h1>
+  <h1>MagnetMap - Carte interactive Languedoc</h1>
 
-  <div id="controls">
-    <label><input type="checkbox" id="batimentsCheckbox" checked /> Bâtiments</label>
-    <input type="color" id="batimentsColor" value="#ff7f50" />
-
-    <label><input type="checkbox" id="hydroCheckbox" checked /> Hydrologie</label>
-    <input type="color" id="hydroColor" value="#1e90ff" />
-
-    <label><input type="checkbox" id="natureCheckbox" checked /> Nature</label>
-    <input type="color" id="natureColor" value="#228B22" />
-
-    <label><input type="checkbox" id="routesCheckbox" checked /> Routes</label>
-    <input type="color" id="routesColor" value="#ff0000" />
+  <div class="layer-control">
+    <label><input type="checkbox" id="routesChk" checked /> Routes</label>
+    <label><input type="checkbox" id="hydroChk" checked /> Hydrologie</label>
+    <label><input type="checkbox" id="natureChk" checked /> Végétation</label>
   </div>
 
   <div id="map"></div>
 
-  <script
-    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-    crossorigin=""
-  ></script>
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+  <!-- Script JS externe -->
   <script src="script.js"></script>
 </body>
 </html>
