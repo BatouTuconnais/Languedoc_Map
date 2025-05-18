@@ -1,0 +1,28 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  text-align: center;
+}
+
+#map {
+  width: 90vw;
+  height: 80vh;
+  margin: 10px auto;
+  border: 2px solid #333;
+  border-radius: 8px;
+}
+
+#controls {
+  margin: 10px auto;
+  width: 90vw;
+  max-width: 700px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+label {
+  user-select: none;
+}

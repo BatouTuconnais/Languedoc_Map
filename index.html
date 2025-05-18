@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>MagnetMap - Carte interactive</title>
+  <link rel="stylesheet" href="style.css" />
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    crossorigin=""
+  />
+</head>
+<body>
+  <h1>MagnetMap - Carte interactive</h1>
+
+  <div id="controls">
+    <label><input type="checkbox" id="batimentsCheckbox" checked /> Bâtiments</label>
+    <input type="color" id="batimentsColor" value="#ff7f50" />
+
+    <label><input type="checkbox" id="hydroCheckbox" checked /> Hydrologie</label>
+    <input type="color" id="hydroColor" value="#1e90ff" />
+
+    <label><input type="checkbox" id="natureCheckbox" checked /> Nature</label>
+    <input type="color" id="natureColor" value="#228B22" />
+
+    <label><input type="checkbox" id="routesCheckbox" checked /> Routes</label>
+    <input type="color" id="routesColor" value="#ff0000" />
+  </div>
+
+  <div id="map"></div>
+
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    crossorigin=""
+  ></script>
+  <script src="script.js"></script>
+</body>
+</html>
