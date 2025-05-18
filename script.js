@@ -1,14 +1,14 @@
-// Initialisation carte Leaflet centrée sur France
+// Initialisation carte Leaflet, centrée France (env)
 const map = L.map('map', {
   zoomControl: true,
   minZoom: 5,
   maxZoom: 18,
 }).setView([46.5, 2.5], 6);
 
-// Pas de fond de carte, fond blanc (vide)
+// Pas de fond OpenStreetMap (fond blanc)
 const emptyLayer = L.tileLayer('', { attribution: '' }).addTo(map);
 
-// DOM des contrôles
+// DOM Contrôles
 const controls = {
   routes: {
     visible: document.getElementById('routes-visible'),
@@ -35,84 +35,88 @@ let layers = {
   nature: null,
 };
 
-// Fonction style (sans contour)
+// Style sans contour, avec couleur et opacité variables
 function styleFunction(layerName) {
   return function (feature) {
-    const color = controls[layerName].color.value;
-    const opacity = parseFloat(controls[layerName].opacity.value);
     return {
-      color: color,
+      color: 'none',         // Pas de contour
       weight: 0,
-      fillColor: color,
-      fillOpacity: opacity,
+      fillColor: controls[layerName].color.value,
+      fillOpacity: parseFloat(controls[layerName].opacity.value),
       stroke: false,
     };
   };
 }
 
-// Charge un fichier GeoJSON, crée la couche, l’ajoute si visible
-async function loadLayer(name, url) {
-  try {
-    const response = await fetch(url);
-    if (!response.ok) throw new Error(response.statusText);
-    const data = await response.json();
-
-    if (layers[name]) map.removeLayer(layers[name]);
-
-    layers[name] = L.geoJSON(data, {
-      style: styleFunction(name),
+// Charge une couche GeoJSON et ajoute sur la carte
+function loadGeoJSONLayer(name, path) {
+  return fetch(path)
+    .then((response) => {
+      if (!response.ok) throw new Error(`Erreur chargement ${path}`);
+      return response.json();
+    })
+    .then((data) => {
+      const geojsonLayer = L.geoJSON(data, {
+        style: styleFunction(name),
+        interactive: true,
+      });
+      geojsonLayer.addTo(map);
+      return geojsonLayer;
+    })
+    .catch((e) => {
+      console.error(e);
+      alert(`Erreur chargement de la couche ${name}`);
+      return null;
     });
+}
 
-    if (controls[name].visible.checked) {
-      layers[name].addTo(map);
-    }
-  } catch (err) {
-    alert(`Erreur de chargement de ${url}: ${err.message}`);
+// Met à jour la visibilité d'une couche
+function updateVisibility(name) {
+  if (!layers[name]) return;
+  if (controls[name].visible.checked) {
+    layers[name].addTo(map);
+  } else {
+    map.removeLayer(layers[name]);
   }
 }
 
-// Recharge toutes les couches
-function reloadAllLayers() {
-  loadLayer('routes', 'data/ROUTES_LEGER_UNIFIE.geojson');
-  loadLayer('hydro', 'data/Hydro_languedoc.geojson');
-  loadLayer('nature', 'data/Nature_LanguedocV2.geojson');
-}
-
-// Met à jour le style d'une couche déjà chargée
+// Met à jour style (couleur et opacité) d'une couche
 function updateStyle(name) {
   if (!layers[name]) return;
   layers[name].setStyle(styleFunction(name));
 }
 
-// Affiche ou masque la couche selon checkbox
-function toggleLayer(name) {
-  if (controls[name].visible.checked) {
-    if (layers[name]) layers[name].addTo(map);
-  } else {
-    if (layers[name]) map.removeLayer(layers[name]);
+// Initialisation : chargement couches
+async function initLayers() {
+  layers.routes = await loadGeoJSONLayer('routes', 'data/ROUTES_LEGER_UNIFIE.geojson');
+  layers.hydro = await loadGeoJSONLayer('hydro', 'data/Hydro_languedoc.geojson');
+  layers.nature = await loadGeoJSONLayer('nature', 'data/Nature_LanguedocV2.geojson');
+
+  // Connecte contrôles à fonctions de mise à jour
+  for (const name of Object.keys(layers)) {
+    if (!layers[name]) continue;
+    controls[name].visible.addEventListener('change', () => updateVisibility(name));
+    controls[name].color.addEventListener('input', () => updateStyle(name));
+    controls[name].opacity.addEventListener('input', () => updateStyle(name));
   }
 }
+initLayers();
 
-// Ajout écouteurs sur contrôles
-Object.keys(controls).forEach((name) => {
-  controls[name].color.addEventListener('input', () => updateStyle(name));
-  controls[name].opacity.addEventListener('input', () => updateStyle(name));
-  controls[name].visible.addEventListener('change', () => toggleLayer(name));
-});
-
-// Initialisation des couches
-reloadAllLayers();
-
-// Ajout contrôle de recherche Leaflet Control Geocoder
+// Ajout du contrôle de recherche (geocoder)
 const geocoder = L.Control.geocoder({
   defaultMarkGeocode: false,
-  placeholder: 'Chercher une ville...',
+  placeholder: "Rechercher une ville...",
 }).addTo(map);
 
 geocoder.on('markgeocode', function (e) {
+  const bbox = e.geocode.bbox;
   const center = e.geocode.center;
-  map.setView(center, 13);
-
-  // Affiche le nom de la ville sous la carte
+  map.fitBounds(bbox);
   cityNameDiv.textContent = e.geocode.name;
 });
+
+// Affiche message par défaut si rien sélectionné
+cityNameDiv.textContent = "Rechercher une ville pour afficher son nom ici.";
+
+// Supprime contours par défaut Leaflet au cas où (ex: polygones)
+L.Path.prototype.options.stroke = false;
