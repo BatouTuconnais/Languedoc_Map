@@ -76,9 +76,9 @@ async function loadLayer(name, url) {
 
 // Recharge toutes les couches
 function reloadAllLayers() {
-  loadLayer('routes', 'ROUTES_LEGER_UNIFIE.geojson');
-  loadLayer('hydro', 'Hydro_languedoc.geojson');
-  loadLayer('nature', 'Nature_LanguedocV2.geojson');
+  loadLayer('routes', 'data/ROUTES_LEGER_UNIFIE.geojson');
+  loadLayer('hydro', 'data/Hydro_languedoc.geojson');
+  loadLayer('nature', 'data/Nature_LanguedocV2.geojson');
 }
 
 // Mise à jour du style d’une couche existante sans la recharger
